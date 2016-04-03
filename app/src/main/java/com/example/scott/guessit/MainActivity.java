@@ -1,12 +1,23 @@
 package com.example.scott.guessit;
 
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Surface;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.Callback*/{
 
@@ -16,6 +27,10 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
     private boolean previewRunning;
     final Context context = this;
     public static Camera camera = null;*/
+
+    private CameraDevice mCameraDevice;
+    private SurfaceView mSurfaceView;
+    public CameraCaptureSession cameraCaptureSession;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +55,56 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
             }
         });
 
-        /*SurView = (SurfaceView)findViewById(R.id.sview);
-        camHolder = SurView.getHolder();
-        camHolder.addCallback(this);
-        camHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);*/
+        mSurfaceView = (SurfaceView) findViewById(R.id.surface);
+
+        CameraManager manager = (CameraManager)getSystemService(Context.CAMERA_SERVICE);
+        try{
+            for (String cameraId : manager.getCameraIdList()) {
+                CameraCharacteristics characteristics
+                        = manager.getCameraCharacteristics(cameraId);
+                Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+                if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
+                    // front camera
+                    continue;
+                }
+                manager.openCamera(cameraId, new CameraDevice.StateCallback() {
+                    @Override
+                    public void onOpened(CameraDevice camera) {
+                       mCameraDevice = camera;
+                    }
+
+                    @Override
+                    public void onDisconnected(CameraDevice camera) {
+
+                    }
+
+                    @Override
+                    public void onError(CameraDevice camera, int error) {
+
+                    }
+                }, null);
+                List<Surface> outputs = Arrays.asList(
+                        mSurfaceView.getHolder().getSurface(), null);
+                mCameraDevice.createCaptureSession(outputs, new CameraCaptureSession.StateCallback() {
+                    @Override
+                    public void onConfigured(CameraCaptureSession session) {
+                        cameraCaptureSession = session;
+                    }
+
+                    @Override
+                    public void onConfigureFailed(CameraCaptureSession session) {
+
+                    }
+                }, null);
+            }
+        }catch (CameraAccessException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            // Currently an NPE is thrown when the Camera2API is used but not supported on the
+            // device this code runs.
+            e.printStackTrace();
+        }
+
     }
 
     /*@Override
