@@ -1,6 +1,9 @@
 package com.example.scott.guessit;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -8,6 +11,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +35,25 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
     private CameraDevice mCameraDevice;
     private SurfaceView mSurfaceView;
     public CameraCaptureSession cameraCaptureSession;
+    public int REQUEST_CAMERA = 1;
+
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            REQUEST_CAMERA);
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +77,8 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
                 MainActivity.this.startActivity(goToGallery);
             }
         });
+
+        requestCameraPermission();
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
 
@@ -105,6 +130,26 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
             e.printStackTrace();
         }
 
+    }
+
+    private void requestCameraPermission() {
+
+        // BEGIN_INCLUDE(camera_permission_request)
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.CAMERA)) {
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // For example if the user has previously denied the permission.
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("This app requires permission to use the camera. Will you grant permission?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        } else {
+
+            // Camera permission has not been granted yet. Request it directly.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+                    REQUEST_CAMERA);
+        }
+        // END_INCLUDE(camera_permission_request)
     }
 
     /*@Override
