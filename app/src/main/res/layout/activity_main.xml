@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
@@ -13,31 +13,45 @@
         android:layout_weight="4"
         />
 
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/surfaceView"
+        android:alpha="0.7"
+        android:foreground="#92ffff" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center|bottom"
-        android:layout_weight="1"
-        android:weightSum="2">
+        android:layout_height="match_parent">
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Take Photo"
-            android:id="@+id/take_photo_btn"
-            android:layout_gravity="center_horizontal|bottom|right"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="#75c1ff" />
+            android:gravity="center|bottom"
+            android:weightSum="6">
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Choose Photo"
-            android:id="@+id/gallery_btn"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="1"
-            android:background="#4c35ff" />
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:text="Take Photo"
+                android:id="@+id/take_photo_btn"
+                android:layout_gravity="center_horizontal|bottom|right"
+                android:layout_weight="1"
+                android:background="#75c1ff" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:text="Choose Photo"
+                android:id="@+id/gallery_btn"
+                android:layout_gravity="center_horizontal|bottom"
+                android:layout_weight="1"
+                android:background="#4c35ff" />
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity{
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
 
+        mCamera.setDisplayOrientation(90);
+
     }
 
     public static Camera getCameraInstance(){
