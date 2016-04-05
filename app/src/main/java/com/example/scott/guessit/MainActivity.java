@@ -1,29 +1,16 @@
 package com.example.scott.guessit;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
+import android.hardware.Camera;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
-import java.util.Arrays;
-import java.util.List;
-
-public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.Callback*/{
+public class MainActivity extends AppCompatActivity{
 
     /*protected static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 0;
     private SurfaceView SurView;
@@ -32,28 +19,8 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
     final Context context = this;
     public static Camera camera = null;*/
 
-    private CameraDevice mCameraDevice;
-    private SurfaceView mSurfaceView;
-    public CameraCaptureSession cameraCaptureSession;
-    public int REQUEST_CAMERA = 1;
-
-    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            switch (which){
-                case DialogInterface.BUTTON_POSITIVE:
-                    //Yes button clicked
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.CAMERA},
-                            REQUEST_CAMERA);
-                    break;
-
-                case DialogInterface.BUTTON_NEGATIVE:
-                    //No button clicked
-                    break;
-            }
-        }
-    };
+    private Camera mCamera;
+    private CameraPreview mPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,115 +45,27 @@ public class MainActivity extends AppCompatActivity /*implements SurfaceHolder.C
             }
         });
 
-        requestCameraPermission();
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
 
-        mSurfaceView = (SurfaceView) findViewById(R.id.surface);
-
-        CameraManager manager = (CameraManager)getSystemService(Context.CAMERA_SERVICE);
-        try{
-            for (String cameraId : manager.getCameraIdList()) {
-                CameraCharacteristics characteristics
-                        = manager.getCameraCharacteristics(cameraId);
-                Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-                if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
-                    // front camera
-                    continue;
-                }
-                manager.openCamera(cameraId, new CameraDevice.StateCallback() {
-                    @Override
-                    public void onOpened(CameraDevice camera) {
-                       mCameraDevice = camera;
-                    }
-
-                    @Override
-                    public void onDisconnected(CameraDevice camera) {
-
-                    }
-
-                    @Override
-                    public void onError(CameraDevice camera, int error) {
-
-                    }
-                }, null);
-                List<Surface> outputs = Arrays.asList(
-                        mSurfaceView.getHolder().getSurface(), null);
-                mCameraDevice.createCaptureSession(outputs, new CameraCaptureSession.StateCallback() {
-                    @Override
-                    public void onConfigured(CameraCaptureSession session) {
-                        cameraCaptureSession = session;
-                    }
-
-                    @Override
-                    public void onConfigureFailed(CameraCaptureSession session) {
-
-                    }
-                }, null);
-            }
-        }catch (CameraAccessException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            // Currently an NPE is thrown when the Camera2API is used but not supported on the
-            // device this code runs.
-            e.printStackTrace();
-        }
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = new CameraPreview(this, mCamera);
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
 
     }
 
-    private void requestCameraPermission() {
-
-        // BEGIN_INCLUDE(camera_permission_request)
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // For example if the user has previously denied the permission.
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("This app requires permission to use the camera. Will you grant permission?").setPositiveButton("Yes", dialogClickListener)
-                    .setNegativeButton("No", dialogClickListener).show();
-        } else {
-
-            // Camera permission has not been granted yet. Request it directly.
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
-                    REQUEST_CAMERA);
+    public static Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open(); // attempt to get a Camera instance
         }
-        // END_INCLUDE(camera_permission_request)
-    }
-
-    /*@Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                               int height) {
-        if(previewRunning){
-            camera.stopPreview();
-        }
-        Camera.Parameters camParams = camera.getParameters();
-        Camera.Size size = camParams.getSupportedPreviewSizes().get(0);
-        camParams.setPreviewSize(size.width, size.height);
-        camera.setParameters(camParams);
-        try{
-            camera.setPreviewDisplay(holder);
-            camera.startPreview();
-            previewRunning=true;
-        }catch(IOException e){
+        catch (Exception e){
+            // Camera is not available (in use or does not exist)
             e.printStackTrace();
         }
+        return c; // returns null if camera is unavailable
     }
-
-    public void surfaceCreated(SurfaceHolder holder) {
-        try{
-            camera=Camera.open();
-        }catch(Exception e){
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();
-            finish();
-        }
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        camera.stopPreview();
-        camera.release();
-        camera=null;
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
