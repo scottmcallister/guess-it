@@ -6,22 +6,25 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.GridView;
 
 import java.util.ArrayList;
 
 public class GalleryActivity extends AppCompatActivity {
+
+    private static final String TAG = "GalleryActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
 
-        ArrayList<String> images = getImagesPath(this);
-        for(int i = 0; i < images.size(); i++){
-            // set image
-        }
+        GridView gridView = (GridView) findViewById(R.id.photo_grid);
+        Log.v(TAG, "Image count" + getImagesPath(this).size());
+        gridView.setAdapter(new ImageAdapter(this, getImagesPath(this)));
     }
 
     @Override
