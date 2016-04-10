@@ -1,9 +1,15 @@
 package com.example.scott.guessit;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 
 public class GalleryActivity extends AppCompatActivity {
 
@@ -11,6 +17,11 @@ public class GalleryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
+
+        ArrayList<String> images = getImagesPath(this);
+        for(int i = 0; i < images.size(); i++){
+            // set image
+        }
     }
 
     @Override
@@ -33,5 +44,25 @@ public class GalleryActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public static ArrayList<String> getImagesPath(Activity activity) {
+        Uri uri;
+        ArrayList<String> listOfAllImages = new ArrayList<String>();
+        Cursor cursor;
+        int column_index_data;
+        String PathOfImage = null;
+        uri = android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI;
+
+        String[] projection = {MediaStore.MediaColumns.DATA};
+
+        cursor = activity.getContentResolver().query(uri, projection, null, null, null);
+
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        while (cursor.moveToNext()) {
+            PathOfImage = cursor.getString(column_index_data);
+            listOfAllImages.add(PathOfImage);
+        }
+        return listOfAllImages;
     }
 }

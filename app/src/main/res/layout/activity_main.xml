@@ -37,7 +37,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/logo"
-                android:layout_gravity="center|top" />
+                android:layout_gravity="center|top"
+                android:src="@mipmap/ic_launcher" />
 
             <View
                 android:layout_width="match_parent"
