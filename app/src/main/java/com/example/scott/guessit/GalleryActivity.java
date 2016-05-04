@@ -2,6 +2,7 @@ package com.example.scott.guessit;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -25,6 +26,7 @@ public class GalleryActivity extends AppCompatActivity {
     GridView imageGrid;
     private int count;
     private String[] imagePaths;
+    private int MY_PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 1;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -58,11 +60,7 @@ public class GalleryActivity extends AppCompatActivity {
             }
         }
 
-        imageGrid = (GridView)findViewById(R.id.photo_grid);
-        imagePaths = getImagePaths();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, imagePaths);
-        imageGrid.setAdapter(adapter);
+
 
         //init_phone_image_grid();
     }
@@ -89,6 +87,37 @@ public class GalleryActivity extends AppCompatActivity {
             Log.i("PATH", arrPath[i]);
         }
         return arrPath;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted
+
+                    imageGrid = (GridView)findViewById(R.id.photo_grid);
+                    imagePaths = getImagePaths();
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                            android.R.layout.simple_list_item_1, imagePaths);
+                    imageGrid.setAdapter(adapter);
+
+                } else {
+
+                    // permission denied
+                    Intent goToGallery = new Intent(GalleryActivity.this, MainActivity.class);
+                    GalleryActivity.this.startActivity(goToGallery);
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
     /*private void init_phone_image_grid() {
